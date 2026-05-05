@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm --workspace api run typecheck)",
+      "Bash(npm --workspace web run typecheck)",
+      "Bash(py --version)",
+      "Bash(python.exe --version)"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "trafficjam",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "web",
+    "api"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace web run dev",
+    "dev:api": "npm --workspace api run dev",
+    "build": "npm --workspace web run build && npm --workspace api run build",
+    "typecheck": "npm --workspace web run typecheck && npm --workspace api run typecheck",
+    "lint": "npm --workspace web run lint"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
