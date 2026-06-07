@@ -8,10 +8,19 @@ type Weather = {
   visibility?: number;
 } | null;
 
-type EventLite = {
+export type EventLite = {
   impactLevel: number;
   affectedRoads?: unknown[];
 };
+
+/** Events that apply to this road. Empty `affectedRoads` on an event = city-wide. */
+export function eventsAffectingRoad(roadId: string, events: EventLite[]): EventLite[] {
+  return events.filter((ev) => {
+    const affected = ev.affectedRoads ?? [];
+    if (!Array.isArray(affected) || affected.length === 0) return true;
+    return affected.some((id) => String(id) === roadId);
+  });
+}
 
 type RoadLite = {
   _id: unknown;
@@ -55,8 +64,8 @@ export function computeRuleBasedScore(input: {
     if (weather.windSpeed !== undefined && weather.windSpeed > 10) score += 0.4;
   }
 
-  for (const ev of events) {
-    score += ev.impactLevel * 0.4;
+  for (const ev of eventsAffectingRoad(String(roadSegment._id), events)) {
+    score += ev.impactLevel * 0.55;
   }
 
   // Add a small deterministic jitter so neighboring roads don't look identical.

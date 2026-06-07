@@ -39,7 +39,10 @@ predictionsRouter.post("/", async (req, res) => {
       const ml = await callMlService({
         selectedTime: time.toISOString(),
         weather,
-        events,
+        events: events.map((e) => ({
+          impactLevel: e.impactLevel,
+          affectedRoads: (e.affectedRoads ?? []).map((id) => String(id)),
+        })),
         roads: roads.map((r) => ({
           id: String(r._id),
           name: r.name,

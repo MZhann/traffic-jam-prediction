@@ -16,6 +16,7 @@ class WeatherInput(BaseModel):
 
 class EventInput(BaseModel):
     impactLevel: int = Field(0, ge=0, le=10)
+    affectedRoads: list[str] = []
 
 
 class RoadInput(BaseModel):

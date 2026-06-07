@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/api";
@@ -40,10 +40,11 @@ function Inner() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { type: "repair", impactLevel: 5, description: "" },
+    defaultValues: { type: "repair", impactLevel: 5, description: "", affectedRoads: [] },
   });
 
   useEffect(() => {
@@ -137,18 +138,28 @@ function Inner() {
           </Field>
         </div>
         <Field label="Affected roads (Ctrl+click to multi-select)">
-          <select
-            multiple
-            {...register("affectedRoads")}
-            className="h-32 w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            {roads.map((r) => (
-              <option key={r._id} value={r._id}>
-                {r.name}
-              </option>
-            ))}
-            {roads.length === 0 && <option disabled>seed roads first</option>}
-          </select>
+          <Controller
+            name="affectedRoads"
+            control={control}
+            render={({ field }) => (
+              <select
+                multiple
+                value={field.value}
+                onChange={(e) => {
+                  const selected = Array.from(e.target.selectedOptions, (o) => o.value);
+                  field.onChange(selected);
+                }}
+                className="h-32 w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {roads.map((r) => (
+                  <option key={r._id} value={r._id}>
+                    {r.name}
+                  </option>
+                ))}
+                {roads.length === 0 && <option disabled>seed roads first</option>}
+              </select>
+            )}
+          />
         </Field>
         <Field label="Description">
           <textarea

@@ -8,7 +8,7 @@ export type MlPredictRequest = {
     windSpeed?: number;
     humidity?: number;
   } | null;
-  events: { impactLevel: number }[];
+  events: { impactLevel: number; affectedRoads?: string[] }[];
   roads: { id: string; name: string; roadType?: string }[];
 };
 

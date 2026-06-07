@@ -1,27 +1,29 @@
 "use client";
 import { useMemo } from "react";
 import { useFilters } from "@/store/filters";
+import { useMounted } from "@/hooks/useMounted";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 export function TrafficTimeline() {
+  const mounted = useMounted();
   const { selectedTime, setSelectedTime, resetTime } = useFilters();
 
-  const dayLabel = useMemo(
-    () =>
-      selectedTime.toLocaleDateString(undefined, {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }),
-    [selectedTime]
-  );
+  const dayLabel = useMemo(() => {
+    if (!mounted) return "";
+    return selectedTime.toLocaleDateString(undefined, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+  }, [selectedTime, mounted]);
 
   const mode = useMemo(() => {
+    if (!mounted) return "current" as const;
     const diff = selectedTime.getTime() - Date.now();
     if (Math.abs(diff) <= 15 * 60 * 1000) return "current";
     return diff < 0 ? "history" : "prediction";
-  }, [selectedTime]);
+  }, [selectedTime, mounted]);
 
   function shiftDay(deltaDays: number) {
     const d = new Date(selectedTime);
@@ -36,8 +38,8 @@ export function TrafficTimeline() {
   }
 
   const currentHour = selectedTime.getHours();
-  const nowHour = new Date().getHours();
-  const isToday = isSameDay(selectedTime, new Date());
+  const nowHour = mounted ? new Date().getHours() : -1;
+  const isToday = mounted && isSameDay(selectedTime, new Date());
 
   return (
     <div className="flex flex-col gap-2 border-t border-border bg-card px-4 py-3">
@@ -78,10 +80,12 @@ export function TrafficTimeline() {
             {mode}
           </span>
           <span className="font-mono text-muted-foreground">
-            {selectedTime.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {mounted
+              ? selectedTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "--:--"}
           </span>
         </div>
       </div>

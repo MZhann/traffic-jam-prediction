@@ -92,8 +92,19 @@ def _rule_based_score(row: dict[str, float]) -> float:
     if row.get("weather_fog", 0) > 0.5:
         score += 1.0
 
-    score += row.get("totalEventImpact", 0) * 0.4
+    score += row.get("totalEventImpact", 0) * 0.55
     return float(max(0.0, min(10.0, score)))
+
+
+def _event_impact_for_road(road_id: str, events: list[dict]) -> float:
+    """Sum impact for events that affect this road. Empty affectedRoads = city-wide."""
+    total = 0.0
+    for e in events:
+        affected = e.get("affectedRoads") or []
+        if affected and road_id not in [str(x) for x in affected]:
+            continue
+        total += float(int(e.get("impactLevel", 0) or 0))
+    return total
 
 
 def build_inference_rows(
@@ -109,10 +120,10 @@ def build_inference_rows(
     wind_speed = (weather or {}).get("windSpeed", 0.0) or 0.0
     humidity = (weather or {}).get("humidity", 50.0) or 50.0
 
-    total_event_impact = float(sum(int(e.get("impactLevel", 0) or 0) for e in events))
-
     rows: list[dict[str, float]] = []
     for road in roads:
+        road_id = str(road.get("id", "") or "")
+        total_event_impact = _event_impact_for_road(road_id, events)
         rows.append(
             build_feature_row(
                 when=when,
